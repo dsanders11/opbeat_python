@@ -1,0 +1,24 @@
+{% if ORGANIZATION_ID %}
+    <script src="https://d3tvtfb6518e3e.cloudfront.net/1/opbeat.min.js"
+            data-org-id="{{ ORGANIZATION_ID }}"
+            data-app-id="{{ APP_ID }}"
+            {% if ASYNC %}async{% endif %}>
+    </script>
+    <script type="text/javascript">
+        _opbeat = window._opbeat || function() {
+            (window._opbeat.q = window._opbeat.q || []).push(arguments)
+        };
+        _opbeat('setUserContext', {
+            {% for field, value in user_context.items %}
+                {{ field }}: {{ value }},
+            {% endfor %}
+        });
+        {% if extra_context %}
+            _opbeat('setExtraContext', {
+                {% for field, value in extra_context.items %}
+                    {{ field }}: {{ value }},
+                {% endfor %}
+            });
+        {% endif %}
+    </script>
+{% endif %}
