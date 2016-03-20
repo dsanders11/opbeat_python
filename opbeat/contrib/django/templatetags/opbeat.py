@@ -20,7 +20,7 @@ def opbeat_javascript(context, async=True, **kwargs):
         if type(value) is bool:
             return "true" if value else "false"
 
-        return mark_safe('"' + str(value) + '"')
+        return mark_safe(u'"{}"'.format(value))
 
     request = context.get('request')
 
