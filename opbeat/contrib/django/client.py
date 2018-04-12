@@ -106,15 +106,24 @@ class DjangoClient(Client):
 
         if request.method != 'GET':
             try:
-                if hasattr(request, 'body'):
-                    # Django 1.4+
-                    raw_data = request.body
+                if hasattr(request, 'raw_post_body'):
+                    # Django <1.4
+                    raw_data = request.raw_post_body
                 else:
-                    raw_data = request.raw_post_data
+                    raw_data = request.body
                 data = raw_data if raw_data else request.POST
-            except Exception:
+            except Exception as e:
                 # assume we had a partial read:
                 data = '<unavailable>'
+
+                try:
+                    # Django 1.4+
+                    from django.http.request import RawPostDataException
+                    
+                    if isinstance(e, RawPostDataException):
+                        data = request.POST.urlencode()
+                except ImportError:
+                    pass
         else:
             data = None
 
