@@ -8,6 +8,7 @@ from opbeat.processors import (RemovePostDataProcessor,
                                SanitizePasswordsProcessor)
 from opbeat.utils import six
 from opbeat.utils.encoding import force_text
+from opbeat.utils.opbeat_json import dumps
 from tests.utils.compat import TestCase
 
 
@@ -105,6 +106,40 @@ class SantizePasswordsProcessorTest(TestCase):
         self.assertTrue('http' in result)
         http = result['http']
         assert 'evil' not in force_text(http['data'])
+
+    def test_post_as_json_bytes_string(self):
+        data = {
+            'http': {
+                'data': six.b(dumps({
+                    'password': 'evil',
+                    'api_key': 'evil',
+                    'harmless': 'bar'
+                })),
+            }
+        }
+        proc = SanitizePasswordsProcessor(Mock())
+        result = proc.process(data)
+        self.assertTrue('http' in result)
+        http = result['http']
+        assert 'evil' not in force_text(http['data'])
+        assert 'bar' in force_text(http['data'])
+
+    def test_post_as_json_string(self):
+        data = {
+            'http': {
+                'data': dumps({
+                    'password': 'evil',
+                    'api_key': 'evil',
+                    'harmless': 'bar'
+                }),
+            }
+        }
+        proc = SanitizePasswordsProcessor(Mock())
+        result = proc.process(data)
+        self.assertTrue('http' in result)
+        http = result['http']
+        assert 'evil' not in force_text(http['data'])
+        assert 'bar' in force_text(http['data'])
 
     def test_querystring_as_string(self):
         data = {

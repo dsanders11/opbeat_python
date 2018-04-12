@@ -13,6 +13,7 @@ import re
 
 from opbeat.utils import six, varmap
 from opbeat.utils.encoding import force_text
+from opbeat.utils.opbeat_json import is_json, loads, dumps
 
 
 class Processor(object):
@@ -113,6 +114,8 @@ class SanitizePasswordsProcessor(Processor):
 
                     data[n] = '&'.join('='.join(k) for k in querybits)
                     continue
+                if is_json(text_data):
+                    data[n] = dumps(varmap(self.sanitize, loads(text_data)))
             data[n] = varmap(self.sanitize, data[n])
 
     def process(self, data, **kwargs):

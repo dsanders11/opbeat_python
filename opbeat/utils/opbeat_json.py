@@ -43,3 +43,10 @@ def dumps(value, **kwargs):
 
 def loads(value, **kwargs):
     return json.loads(value, object_hook=better_decoder)
+
+def is_json(value):
+    try:
+        loads(value)
+        return True
+    except ValueError:
+        return False
